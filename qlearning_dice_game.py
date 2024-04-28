@@ -151,6 +151,17 @@ def print_debug(*args, **kwargs):
     if debug:
         print(*args, **kwargs)
 
+def print_debug_training_tables(wins, losses):
+    win_entries = [f"Wins[{current_score}, {opponent_score}, {num_dice}] = {count}" 
+                   for (current_score, opponent_score, num_dice), count in wins.items()]
+    loss_entries = [f"Losses[{current_score}, {opponent_score}, {num_dice}] = {count}" 
+                    for (current_score, opponent_score, num_dice), count in losses.items()]
+
+    print_debug("Wins table: ")
+    print_debug(', '.join(win_entries))
+    print_debug("Losses table: ")
+    print_debug(', '.join(loss_entries))
+
 if __name__ == "__main__":
     args = parse_args()
     debug = args.v
@@ -171,5 +182,5 @@ if __name__ == "__main__":
         print(Fore.MAGENTA + f"\n\nPlaying game #{i+1}:")
         result = play_dice_game(args.ND, args.NS, args.L, args.H, args.M, wins, losses)
         print(Fore.GREEN + f"\n{result}")
-        print_debug(f"\nWins: {wins}")
-        print_debug(f"Losses: {losses}")
+        print_debug()
+        print_debug_training_tables(wins, losses)
