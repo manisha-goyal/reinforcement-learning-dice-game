@@ -15,7 +15,7 @@ class QLearning:
     def choose_number_of_dice(self, current_score, opponent_score):
         weighted_probs = [1 / self.num_dice] * self.num_dice # Initialize to equal probability assuming no games played yet
         win_probs = []
-        total_games = 0
+        T = 0
         win_values = ""
         loss_values = ""
 
@@ -29,7 +29,7 @@ class QLearning:
 
             w_d = win / total if total > 0 else 0
             win_probs.append(w_d)
-            total_games += total
+            T += total
 
             win_values += f"Wins[{current_score}, {opponent_score}, {num_dice}] = {win}, "
             loss_values += f"Losses[{current_score}, {opponent_score}, {num_dice}] = {loss}, "
@@ -40,13 +40,13 @@ class QLearning:
         print_debug(loss_values)
 
         # Compute weighted probabilities of current state for each dice option
-        if total_games > 0:
+        if T > 0:
             # Find the best d (break tie randomly) and Wd
             best_d = random.choice([i for i, w in enumerate(win_probs) if w == max(win_probs)])
             w_prime_d = win_probs[best_d]
 
             # Calculate Pd for Wd
-            p_d = (total_games * w_prime_d + self.exploration_param) / (total_games * w_prime_d + self.num_dice * self.exploration_param)
+            p_d = (T * w_prime_d + self.exploration_param) / (T * w_prime_d + self.num_dice * self.exploration_param)
             
             # Calculate P'd for W'd
             weighted_probs = []
@@ -55,7 +55,7 @@ class QLearning:
                 if i == best_d:
                     weighted_probs.append(p_d)
                 else:
-                    p_prime_d = (1 - p_d) * (w_d + self.exploration_param) / (s * total_games + (self.num_dice - 1) * self.exploration_param)
+                    p_prime_d = (1 - p_d) * (w_d + self.exploration_param) / (s * T + (self.num_dice - 1) * self.exploration_param)
                     weighted_probs.append(p_prime_d)
 
         print_debug(f"Win Probabilities = [{', '.join(str(round(p, 3)) for p in win_probs)}]")
