@@ -186,8 +186,8 @@ if __name__ == "__main__":
     print_debug(f"Exploration parameter: {args.M}")
     print_debug(f"Verbose mode: {'Enabled' if args.v else 'Disabled'}")
 
-    game = DiceGame(args.ND, args.NS, args.L, args.H, {}, {})
-    q_learning = QLearning(args.ND, args.M)
+    game = DiceGame(args.ND, args.NS, args.L, args.H)
+    q_learning = QLearning(args.ND, args.M, {}, {})
 
     for i in range(args.G):
         print(Fore.MAGENTA + f"\n\nPlaying game #{i+1}:")
