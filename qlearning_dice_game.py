@@ -6,11 +6,11 @@ init(autoreset=True)
 verbose = False
 
 class QLearning:
-    def __init__(self, num_dice, exploration_param):
+    def __init__(self, num_dice, exploration_param, wins, losses):
         self.num_dice = num_dice
         self.exploration_param = exploration_param
-        self.wins = {}
-        self.losses = {}
+        self.wins = wins
+        self.losses = losses
 
     def choose_number_of_dice(self, current_score, opponent_score):
         weighted_probs = [1 / self.num_dice] * self.num_dice # Initialize to equal probability assuming no games played yet
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     print_debug(f"Exploration parameter: {args.M}")
     print_debug(f"Verbose mode: {'Enabled' if args.v else 'Disabled'}")
 
-    game = DiceGame(args.ND, args.NS, args.L, args.H)
+    game = DiceGame(args.ND, args.NS, args.L, args.H, {}, {})
     q_learning = QLearning(args.ND, args.M)
 
     for i in range(args.G):
