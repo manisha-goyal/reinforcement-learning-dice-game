@@ -6,11 +6,20 @@ init(autoreset=True)
 verbose = False
 
 class QLearning:
-    def __init__(self, num_dice, exploration_param, wins, losses):
+    def __init__(self, num_dice, low_score, exploration_param, wins, losses, results):
         self.num_dice = num_dice
+        self.low_score = low_score
         self.exploration_param = exploration_param
         self.wins = wins
         self.losses = losses
+        self.results = results
+        self.initialize_results()
+
+    def initialize_results(self):
+        # Initialize the results matrix with 'n/a' for X = 0 to low_score and Y = 0 to low_score
+        for x in range(self.low_score):
+            for y in range(self.low_score):
+                self.results[(x, y)] = ("n/a", "n/a")
 
     def choose_number_of_dice(self, current_score, opponent_score):
         weighted_probs = [1 / self.num_dice] * self.num_dice # Initialize to equal probability assuming no games played yet
@@ -62,7 +71,13 @@ class QLearning:
         print_debug(f"Weighted probabilities = [{', '.join(str(round(p, 3)) for p in weighted_probs)}]")
 
         # Choose a dice number randomly based on the weighted probabilities
-        return random.choices(range(1, self.num_dice + 1), weights=weighted_probs, k=1)[0]
+        best_dice = random.choices(range(1, self.num_dice + 1), weights=weighted_probs, k=1)[0]
+
+        # Update results table for output printing
+        if T > 0:
+            self.results[(current_score, opponent_score)] = (best_dice, weighted_probs[best_dice - 1])
+
+        return best_dice
 
     def update_training_tables(self, winner_history, loser_history):
         # Update wins table with winner's history
@@ -72,6 +87,27 @@ class QLearning:
         # Update losses table with loser's history
         for state in loser_history:
             self.losses[state] = self.losses.get(state, 0) + 1
+
+    def print_results(self):
+        column_width = 10  
+        
+        headers = [""] + [f"{i:^{column_width}}" for i in range(self.low_score)]
+        print("".join(headers))
+
+        for x in range(self.low_score):
+            row = [f"{x:<2}"]
+            for y in range(self.low_score):
+                if (x, y) in self.results:
+                    dice, prob = self.results[(x, y)]
+                    if isinstance(dice, str) and dice == "n/a":  # No data available
+                        row.append(f"{dice:^{column_width}}")
+                    else:
+                        formatted_result = f"{dice}:{prob:.3f}"
+                        row.append(f"{formatted_result:^{column_width}}")
+                else:
+                    row.append(f"{'n/a':^{column_width}}")
+            print("".join(row))
+
 
     def print_debug_training_tables(self):
         win_entries = [f"Wins[{current_score}, {opponent_score}, {num_dice}] = {count}" 
@@ -111,14 +147,14 @@ class DiceGame:
             # Roll the dice and get the result and the individual rolls
             roll_result, rolls = self.roll_dice(num_dice)
 
-            print(Fore.CYAN + f"\n{'A' if turn else 'B'} rolls {num_dice} dice ({', '.join(str(roll) for roll in rolls)}) for a score of {roll_result}")
+            print_debug(Fore.CYAN + f"\n{'A' if turn else 'B'} rolls {num_dice} dice ({', '.join(str(roll) for roll in rolls)}) for a score of {roll_result}")
 
             if turn:
                 # Append current state to player A's history and update player A's score
                 player_A_history.append((player_A_score, player_B_score, num_dice))
                 player_A_score += roll_result
 
-                print(Fore.CYAN + f"Scores: A = {player_A_score}, B = {player_B_score}")
+                print_debug(Fore.CYAN + f"Scores: A = {player_A_score}, B = {player_B_score}")
 
                 # Check if player A wins or loses and update training tables accordingly
                 if player_A_score > self.high_score:
@@ -132,7 +168,7 @@ class DiceGame:
                 player_B_history.append((player_B_score, player_A_score, num_dice))
                 player_B_score += roll_result
 
-                print(Fore.CYAN + f"Scores: A = {player_A_score}, B = {player_B_score}")
+                print_debug(Fore.CYAN + f"Scores: A = {player_A_score}, B = {player_B_score}")
 
                 # Check if player B wins or loses and update training tables accordingly
                 if player_B_score > self.high_score:
@@ -187,11 +223,14 @@ if __name__ == "__main__":
     print_debug(f"Verbose mode: {'Enabled' if args.v else 'Disabled'}")
 
     game = DiceGame(args.ND, args.NS, args.L, args.H)
-    q_learning = QLearning(args.ND, args.M, {}, {})
+    q_learning = QLearning(args.ND, args.L, args.M, {}, {}, {})
 
     for i in range(args.G):
-        print(Fore.MAGENTA + f"\n\nPlaying game #{i+1}:")
+        print_debug(Fore.MAGENTA + f"\n\nPlaying game #{i+1}:")
         result = game.play_dice_game(q_learning)
-        print(Fore.GREEN + f"\n{result}")
+        print_debug(Fore.GREEN + f"\n{result}")
         print_debug("")
         q_learning.print_debug_training_tables()
+
+    print_debug(Fore.MAGENTA + "\n\nResults Matrix to demonstrate learning:\n")
+    q_learning.print_results()
