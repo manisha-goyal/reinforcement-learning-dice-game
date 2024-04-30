@@ -46,7 +46,7 @@ python dice_game_simulation.py -NS <number_of_sides> -ND <number_of_dice> -H <hi
 ## Example Usage
 
 ```bash
-python dice_game_simulation.py -NS 6 -ND 2 -H 21 -L 15 -G 100 -M 1 -v
+python dice_game_simulation.py -NS 6 -ND 2 -H 21 -L 15 -G 1000 -M 10 -v
 ```
 
 ## Output
