@@ -52,19 +52,19 @@ class QLearning:
         if T > 0:
             # Find the best d (break tie randomly) and Wd
             best_d = random.choice([i for i, w in enumerate(win_probs) if w == max(win_probs)])
-            w_prime_d = win_probs[best_d]
+            w_d = win_probs[best_d]
 
             # Calculate Pd for Wd
-            p_d = (T * w_prime_d + self.exploration_param) / (T * w_prime_d + self.num_dice * self.exploration_param)
+            p_d = (T * w_d + self.exploration_param) / (T * w_d + self.num_dice * self.exploration_param)
             
             # Calculate P'd for W'd
             weighted_probs = []
-            s = sum(win_probs) - w_prime_d
-            for i, w_d in enumerate(win_probs):
+            s = sum(win_probs) - w_d
+            for i, w_prime_d in enumerate(win_probs):
                 if i == best_d:
                     weighted_probs.append(p_d)
                 else:
-                    p_prime_d = (1 - p_d) * (T * w_d + self.exploration_param) / (s * T + (self.num_dice - 1) * self.exploration_param)
+                    p_prime_d = (1 - p_d) * (T * w_prime_d + self.exploration_param) / (s * T + (self.num_dice - 1) * self.exploration_param)
                     weighted_probs.append(p_prime_d)
 
         print_debug(f"Win Probabilities = [{', '.join(str(round(p, 3)) for p in win_probs)}]")
