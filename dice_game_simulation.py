@@ -64,7 +64,7 @@ class QLearning:
                 if i == best_d:
                     weighted_probs.append(p_d)
                 else:
-                    p_prime_d = (1 - p_d) * (w_d + self.exploration_param) / (s * T + (self.num_dice - 1) * self.exploration_param)
+                    p_prime_d = (1 - p_d) * (T * w_d + self.exploration_param) / (s * T + (self.num_dice - 1) * self.exploration_param)
                     weighted_probs.append(p_prime_d)
 
         print_debug(f"Win Probabilities = [{', '.join(str(round(p, 3)) for p in win_probs)}]")
