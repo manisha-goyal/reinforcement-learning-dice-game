@@ -16,7 +16,7 @@ class QLearning:
         self.initialize_results()
 
     def initialize_results(self):
-        # Initialize the results matrix with 'n/a' for X = 0 to low_score and Y = 0 to low_score
+        # Initialize the results matrix with 'n/a'
         for x in range(self.low_score):
             for y in range(self.low_score):
                 self.results[(x, y)] = ("n/a", "n/a")
